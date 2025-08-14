@@ -55,11 +55,29 @@ export class UsersService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(usernameOrEmail: string, updateUserDto: UpdateUserDto) {
+
+    try {
+      const user = await this.findOne(usernameOrEmail)
+      this.userRepository.merge(user, updateUserDto);
+      await this.userRepository.save(user);
+      return `User with username/email "${usernameOrEmail}" was updated successfully`;
+    } catch (error) {
+      this.logger.error(`Error searching user "${usernameOrEmail}"`, error.stack);
+      throw error instanceof NotFoundException ? error : new InternalServerErrorException();
+    }
+
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(usernameOrEmail: string) {
+    try {
+      const user = await this.findOne(usernameOrEmail)
+      this.userRepository.merge(user, { deleted: true });
+      await this.userRepository.save(user);
+      return `User with username/email "${usernameOrEmail}" was updated successfully`;
+    } catch (error) {
+      this.logger.error(`Error searching user "${usernameOrEmail}"`, error.stack);
+      throw error instanceof NotFoundException ? error : new InternalServerErrorException();
+    }
   }
 }
