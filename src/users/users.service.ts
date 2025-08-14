@@ -1,21 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Repository } from 'typeorm';
+import { User } from 'src/shared/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    console.log(createUserDto);
-    
-    return 'This action adds a new user';
+  private readonly logger = new Logger(UsersService.name);
+
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) { }
+
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const user = this.userRepository.create(createUserDto);
+      await this.userRepository.save(user);
+      return 'User created successfully';
+    } catch (error) {
+      this.logger.error('Error creating user:', error);
+      return error.message;
+    }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    try {
+      const users = await this.userRepository.find();
+      return users;
+    } catch (error) {
+      this.logger.error('searching users:', error);
+      return error.message;
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(usernameOrEmail: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: [
+          { username: usernameOrEmail },
+          { email: usernameOrEmail }
+        ]
+      });
+
+      if (!user) {
+        throw new NotFoundException(`User with username/email "${usernameOrEmail}" not found`);
+      }
+
+      return user;
+    } catch (error) {
+      this.logger.error(`Error searching user "${usernameOrEmail}"`, error.stack);
+      throw error instanceof NotFoundException ? error : new InternalServerErrorException();
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
