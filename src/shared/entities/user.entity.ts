@@ -42,7 +42,7 @@ export class User {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    // 🔹 Antes de insertar, hasheamos la contraseña
+    
     @BeforeInsert()
     async hashPasswordBeforeInsert() {
         await this.hashPassword();
