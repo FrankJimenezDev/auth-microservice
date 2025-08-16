@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { User } from 'src/shared/entities/user.entity';
 
@@ -7,7 +7,6 @@ const logger = new Logger('Database');
 
 export function selectDataBase() {
     return TypeOrmModule.forRootAsync({
-        imports: [ConfigModule],
         inject: [ConfigService],
         useFactory: (configService: ConfigService) => {
             const dbType = configService.get<string>('DB_TYPE');
