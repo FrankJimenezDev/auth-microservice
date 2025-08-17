@@ -11,11 +11,11 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    @Inject('REDIS_CLIENT') 
-    private readonly redis: Redis, 
-  ) {}
+    @Inject('REDIS_CLIENT')
+    private readonly redis: Redis,
+  ) { }
 
-  async logIn(createAuthDto: CreateAuthDto): Promise<string> {
+  async logIn(createAuthDto: CreateAuthDto): Promise<{ token: string }> {
     try {
       const user = await this.usersService.findOne(createAuthDto.usernameOrEmail);
       const isMatch = await user.comparePassword(createAuthDto.password);
@@ -29,7 +29,9 @@ export class AuthService {
 
       await this.redis.set(`user:${user.id}`, token);
 
-      return token;
+      return {
+        token
+      };
     } catch (error) {
       this.logger.error('Error logging user:', error);
       return error.message;
