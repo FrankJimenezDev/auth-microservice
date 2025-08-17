@@ -34,7 +34,7 @@ export class JwtAuthGuard implements CanActivate {
       // Validar que el token siga activo en Redis
       await this.authService.validateToken(payload.sub, token);
 
-      // Guardar usuario en la request para usarlo en el controlador
+      // Guarda usuario en la request para usarlo en el controlador
       request.user = payload;
 
       return true;
