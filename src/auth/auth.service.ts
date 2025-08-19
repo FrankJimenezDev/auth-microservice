@@ -38,23 +38,6 @@ export class AuthService {
     }
   }
 
-  async validateToken(userId: string, token: string) {
-    try {
-      this.jwtService.verify(token);
-    } catch {
-      throw new UnauthorizedException('Token inválido');
-    }
-
-    const storedToken = await this.redis.get(`user:${userId}`);
-    if (storedToken !== token) {
-      throw new UnauthorizedException(
-        'Tu sesión fue cerrada porque iniciaste sesión en otro dispositivo',
-      );
-    }
-
-    return true;
-  }
-
   async logout(userId: string) {
     await this.redis.del(`user:${userId}`);
   }
