@@ -1,6 +1,7 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -14,10 +15,20 @@ export class AuthController {
     return this.authService.logIn(createAuthDto);
   }
 
-  // @Post()
-  // logInGoogle(@Body() createAuthDto: CreateAuthDto) {
-  //   return this.authService.create(createAuthDto);
-  // }
+  // Paso 1: Redirige a Google
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req) {
+    return {
+      message: 'Usuario autenticado con Google',
+      user: req.user,
+    };
+  }
 
   // @Post()
   // logInGitHub(@Body() createAuthDto: CreateAuthDto) {
